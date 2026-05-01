@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useLoginMutation } from "@/redux/features/auth/auth.api";
 
 // import { useLoginMutation } from "@/redux/features/auth/auth.api";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
@@ -21,18 +22,23 @@ export function LoginForm({
 }: React.HTMLAttributes<HTMLDivElement>) {
   const navigate = useNavigate();
   const form = useForm();
-  //   const [login] = useLoginMutation();
+  const [login] = useLoginMutation();
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    // try {
-    //   const res = await login(data).unwrap();
-    //   console.log(res);
-    // } catch (err) {
-    //   console.error(err);
-    //   if (err.status === 401) {
-    //     toast.error("Your account is not verified");
-    //     navigate("/verify", { state: data.email });
-    //   }
-    // }
+    try {
+      const res = await login(data).unwrap();
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+
+      if (typeof err === "object" && err !== null && "status" in err) {
+        const error = err as { status: number };
+
+        if (error.status === 401) {
+          toast.error("Your account is not verified");
+          navigate("/verify", { state: data.email });
+        }
+      }
+    }
   };
 
   return (
